@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Planet challenge</title>
+       <link rel="stylesheet" media="screen" href ="{{ url_for('static', filename='bootstrap.min.css') }}">
+       <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap-theme.min.css') }}">
+       <meta name="viewport" content = "width=device-width, initial-scale=1.0">
+
+       <script src="{{ url_for('static', filename='jquery-3.1.1.min.js') }}"></script>
+       <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+
+
+    </head>
+    <body>
+
+        <div class="jumbotron text-center" >
+          <h2 style="margin-top: -0px;">Planet Challenge</h2>
+          <p class="lead" style="margin-bottom: -0px;">Handwritten digit classifier</p>
+        </div>
+
+
+<div class="container-fluid">
+    <div class="row">
+    <div class="well col-md-6 col-md-offset-3" style="background-color:white !important; border-width:2px; border-color:black;">
+        <p>This is a REST service for recognition of digit images. Please upload a file, which needs to be less than 1 Mb in size and in png, jpeg, or gif format. The image resolution will be resampled to match the MNIST training dataset and, if rectangular, its shape will be cropped to a square.</p>
+
+    </div>
+
+
+    <div class="col-md-2 col-md-offset-5">
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+
+        {% for message in messages %}
+            {% if "Error" not in message[1]: %}
+                <div class="alert alert-info">
+                <strong> {{ message[1] }} </strong>
+                </div>
+            {% endif %}
+
+            {% if "Error" in message[1]: %}
+                <div class="alert alert-warning">
+                {{ message[1] }}
+                </div>
+            {% endif %}
+        {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+
+        <div  class="col-md-3 col-md-offset-3">
+        <h3>Access via command line</h3>
+        <br>
+        <p>When running on AWS, replace the localhost 127.0.0.1:5000 with the ELB DNS:</p>
+        <pre><code>
+curl -i -F 'myfile=@/abspath/some_image.png' \
+http://127.0.0.1:5000/curl-api
+        </code></pre>
+        </div>
+
+
+
+
+      <div class="col-md-3 col-md-offset-0">
+
+  <h3>Access via webform</h3>
+
+  <br>
+
+  {% from "formhelpers.html" import render_field %}
+  <form method="POST" enctype="multipart/form-data" action="/">
+
+    <dl>
+      {{ render_field(form.myfile) }}
+      {{ render_field(form.submit) }}
+
+    </dl>
+  </form>
+
+
+</div>
+<br>
+</div>
+
+</div>
+</body>
+</html>

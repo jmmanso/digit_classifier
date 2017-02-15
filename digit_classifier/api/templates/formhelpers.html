@@ -1,0 +1,40 @@
+{% macro render_field(field) %}
+
+{% set placeholder = kwargs.pop('placeholder', field.label.text) %}
+{% set class_ = kwargs.pop('class_', '') %}
+
+<div class="form-group">
+    {% if field.type == 'SubmitField' %}
+    <label></label>
+    {% else %}
+    <label class="control-label">{{field.label}}</label>
+    {% endif %}
+
+    {% if field.type == 'SubmitField' %}
+    {{ field(class_='btn btn-default', **kwargs) }}
+
+    {% elif field.type == 'RadioField' %}
+    {{ field(class_='radio', **kwargs) }}
+
+    {% elif field.type in ('TextField', 'StringField') %}
+    {{ field(class_='form-control', **kwargs) }}
+
+    {% elif field.type == 'SelectField' %}
+    {{ field(class_='form-control', **kwargs) }}
+
+    {% else %}
+
+    {{ field(class_=class_, placeholder=placeholder, **kwargs) }}
+
+    {% endif %}
+
+    {% if field.errors %}
+    <span class="error help-inline">{{ field.errors|join(', ') }}</span>
+    {% endif %}
+
+    {% if field.description %}
+    <p class="help-block">{{ field.description|safe }}</p>
+    {% endif %}
+
+</div>
+{% endmacro %}
