@@ -1,8 +1,16 @@
 #!/bin/bash
 
-#Setup the python virtual environment
+# Setup the python virtual environment.
+# Conda messes up external virtualenvs, thus,
+# if conda is installed, should be used to install
+# virtualenv.
 
-sudo easy_install virtualenv
+if hash conda; then
+      sudo conda install virtualenv
+   else
+      sudo easy_install virtualenv
+fi
+
 
 sudo rm -rf $PYVENV
 

@@ -22,7 +22,7 @@
 <div class="container-fluid">
     <div class="row">
     <div class="well col-md-6 col-md-offset-3" style="background-color:white !important; border-width:2px; border-color:black;">
-        <p>This is a REST service for recognition of digit images. Please upload a file, which needs to be less than 1 Mb in size and in png, jpeg, or gif format. The image resolution will be resampled to match the MNIST training dataset and, if rectangular, its shape will be cropped to a square.</p>
+        <p>This is a REST service for recognition of digit images. Please upload a file that is less than 1 Mb in size and in png, jpeg, or gif format. Works best when the digit is approximately in the center of the image and the background is homogeneous. </p>
 
     </div>
 
@@ -53,9 +53,14 @@
         <div  class="col-md-3 col-md-offset-3">
         <h3>Access via command line</h3>
         <br>
-        <p>When running on AWS, replace the localhost 127.0.0.1:5000 with the ELB DNS:</p>
         <pre><code>
-curl -i -F 'myfile=@/abspath/some_image.png' \
+curl -i -F 'myfile=@/absolute_path/to_some_image.png' \
+http://ec2-54-219-168-245.us-west-1.compute.amazonaws.com/curl-api
+        </code></pre>
+        <br>
+        <p>Alternatively, if you are running a local Flask server:</p>
+        <pre><code>
+curl -i -F 'myfile=@/absolute_path/to_some_image.png' \
 http://127.0.0.1:5000/curl-api
         </code></pre>
         </div>
