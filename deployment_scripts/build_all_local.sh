@@ -10,3 +10,4 @@ bash install_pyvenv.sh
 bash train_mymodel.sh
 
 # Spin up Flask server on localhost
+sudo -E $PYVENV/bin/python $MYAPP_API_DIR/views.py

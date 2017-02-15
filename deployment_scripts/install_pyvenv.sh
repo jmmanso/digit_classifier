@@ -13,4 +13,4 @@ sudo -E virtualenv $PYVENV
 
 sudo -E $PYVENV/bin/pip install --upgrade pip
 
-sudo -E $PYVENV/bin/pip install -r requirements.txt
+sudo -E $PYVENV/bin/pip install -r $MYAPP_REPO_DIR/deployment_scripts/requirements.txt

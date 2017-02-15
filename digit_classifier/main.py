@@ -53,7 +53,7 @@ class Classifier:
         return output
 
 
-if __name__=="main":
+if __name__=="__main__":
     # -t flag indicates training
     if sys.argv[1] == "-t":
         Trainer()()

@@ -1,11 +1,7 @@
-from flask_wtf import FlaskForm
-from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms import SubmitField, Form
 
-class ImageForm2(FlaskForm):
-    myfile = FileField()
-    #FileField(validators=[FileRequired(), FileAllowed(['png','jpeg','gif','svg','jpg'], message = 'Invalid file extension')])
-    #submit = SubmitField("Send")
+from wtforms import SubmitField, Form, FileField
+
+
 
 
 class ImageForm(Form):
