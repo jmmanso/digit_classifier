@@ -46,7 +46,7 @@ mlp_params = {
 N_epochs = 5
 # file path for trained weights
 weights_path = os.path.join(thisdir,\
-    'api/static/model_data/mlp_params.json')
+    'api/static/model_data/mlp.param')
 
 
 

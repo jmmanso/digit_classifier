@@ -1,12 +1,13 @@
-import cPickle
 from sklearn.preprocessing import OneHotEncoder
 from scipy import misc
 import subprocess
 import numpy as np
 import os
+thisdir = os.path.dirname(__file__)
+#
 import config
 import read_mnist
-thisdir = os.path.dirname(__file__)
+
 
 
 

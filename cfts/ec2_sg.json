@@ -1,0 +1,97 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation Sample Template EC2InstanceWithSecurityGroupSample: Create an Amazon EC2 instance running the Amazon Linux AMI. The AMI is chosen based on the region in which the stack is run. This example creates an EC2 security group for the instance to give you SSH access. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+
+
+  "Resources" : {
+
+    "vpc49d1362c": {
+    "Type": "AWS::EC2::VPC",
+    "Properties": {
+      "CidrBlock": "172.31.0.0/16",
+      "InstanceTenancy": "default",
+      "EnableDnsSupport": "true",
+      "EnableDnsHostnames": "true"
+    }
+    },
+
+    "subnet6d8e6408": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.16.0/20",
+        "AvailabilityZone": "us-west-1a",
+        "VpcId": {
+          "Ref": "vpc49d1362c"
+        }
+      }
+    },
+    "subnet08c1eb4e": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.0.0/20",
+        "AvailabilityZone": "us-west-1c",
+        "VpcId": {
+          "Ref": "vpc49d1362c"
+            }
+        }
+    },
+
+    "EC2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "InstanceType" : { "Ref" : "InstanceType" },
+        "SecurityGroups" : [ { "Ref" : "InstanceSecurityGroup" }, {"Ref":"WebServerSG"} ],
+        "KeyName" :  "jmmanso-key-pair-ncalifornia" ,
+        "ImageId" : "ami-539ac933"
+      }
+    },
+
+    "InstanceSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable SSH access via port 22",
+        "SecurityGroupIngress" : [ {
+          "IpProtocol" : "tcp",
+          "FromPort" : "22",
+          "ToPort" : "22",
+          "CidrIp" : "209.203.92.50/32"
+        } ]
+      }
+  },
+
+  "WebServerSG": {
+    "Type": "AWS::EC2::SecurityGroup",
+    "Properties": {
+      "GroupDescription": "SG for the Web Server",
+      "VpcId": {
+        "Ref": "VPC"
+      },
+      "SecurityGroupEgress": [
+        {
+          "IpProtocol": "-1",
+          "CidrIp": "0.0.0.0/0"
+        }
+      ],
+      "SecurityGroupIngress" : [
+          {
+          "IpProtocol": "tcp",
+          "CidrIp": "0.0.0.0/0",
+          "FromPort": "80",
+          "ToPort": "80"
+        },
+        {
+          "IpProtocol": "tcp",
+          "CidrIp": "0.0.0.0/0",
+          "FromPort": "443",
+          "ToPort": "443"
+        }
+      ]
+    }
+  }
+
+
+
+  }
+
+}

@@ -1,9 +1,8 @@
+import sys
 import numpy as np
 from feather import ann
 import preprocessing
 import config
-
-# wtforms, flask_wtf, Pillow, scipy>=18.1
 
 
 
@@ -54,7 +53,10 @@ class Classifier:
         return output
 
 
-
+if __name__=="main":
+    # -t flag indicates training
+    if sys.argv[1] == "-t":
+        Trainer()()
 
 
 

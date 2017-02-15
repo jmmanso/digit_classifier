@@ -1,0 +1,159 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "vpc49d1362c": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": "172.31.0.0/16",
+        "InstanceTenancy": "default",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true"
+      }
+    },
+    "subnet6d8e6408": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.16.0/20",
+        "AvailabilityZone": "us-west-1a",
+        "VpcId": {
+          "Ref": "vpc49d1362c"
+        }
+      }
+    },
+    "subnet08c1eb4e": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "CidrBlock": "172.31.0.0/20",
+        "AvailabilityZone": "us-west-1c",
+        "VpcId": {
+          "Ref": "vpc49d1362c"
+        }
+      }
+    },
+    "MyInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "DisableApiTermination": "false",
+        "InstanceInitiatedShutdownBehavior": "stop",
+        "ImageId": "ami-539ac933",
+        "InstanceType": "t2.micro",
+        "KeyName": "jmmanso-key-pair-ncalifornia",
+        "Monitoring": "false",
+        "NetworkInterfaces": [
+          {
+            "DeleteOnTermination": "true",
+            "DeviceIndex": 0,
+            "SubnetId": {
+              "Ref": "subnet08c1eb4e"
+            },
+            "PrivateIpAddresses": [
+              {
+                "PrivateIpAddress": "172.31.13.98",
+                "Primary": "true"
+              }
+            ],
+            "GroupSet": [
+              {
+                "Ref": "sgjmmansoSGncalifornia"
+              }
+            ],
+            "AssociatePublicIpAddress": "true"
+          }
+      ],
+
+
+      "UserData" :  {"Fn::Base64":{"Fn::Join":["", [
+          "# Install goodies \n",
+              "apt-get -y install wget \n",
+              "apt-get -y install git \n",
+              "apt-get -y install python-dev \n",
+              "apt-get -y install python-pip \n",
+              "apt-get -y install python-virtualenv \n",
+              "apt-get -y install apache2 \n",
+              "apt-get -y install libapache2-mod-wsgi \n",
+              "apt-get -y install  swig  \n",
+          "# End of file #"
+      ] ] } }
+
+
+      }
+    },
+    "sgjmmansoSGncalifornia": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "basic SG",
+        "VpcId": {
+          "Ref": "vpc49d1362c"
+        }
+      }
+    },
+    "dchpassoc3": {
+      "Type": "AWS::EC2::VPCDHCPOptionsAssociation",
+      "Properties": {
+        "VpcId": {
+          "Ref": "vpc49d1362c"
+        },
+        "DhcpOptionsId": "dopt-d0fde9b2"
+      }
+    },
+    "ingress6": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgjmmansoSGncalifornia"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "80",
+        "ToPort": "80",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "ingress7": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgjmmansoSGncalifornia"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "209.203.92.50/32"
+      }
+    },
+    "ingress8": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgjmmansoSGncalifornia"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "22",
+        "ToPort": "22",
+        "CidrIp": "24.7.13.48/32"
+      }
+    },
+    "ingress9": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgjmmansoSGncalifornia"
+        },
+        "IpProtocol": "tcp",
+        "FromPort": "443",
+        "ToPort": "443",
+        "CidrIp": "0.0.0.0/0"
+      }
+    },
+    "egress3": {
+      "Type": "AWS::EC2::SecurityGroupEgress",
+      "Properties": {
+        "GroupId": {
+          "Ref": "sgjmmansoSGncalifornia"
+        },
+        "IpProtocol": "-1",
+        "CidrIp": "0.0.0.0/0"
+      }
+    }
+  },
+  "Description": ""
+}

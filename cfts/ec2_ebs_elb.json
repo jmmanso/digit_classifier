@@ -1,0 +1,243 @@
+{	"AWSTemplateFormatVersion":"2010-09-09",
+
+	"Description":"CloudFormation template to create a Ubuntu AMI1701 App server.",
+
+	"Parameters" : {
+		"ServerAdminPassword" : {
+			"Default"               : "Capital1",
+			"NoEcho"                : "true",
+			"Description"           : "Enter (and record!) the <secret> ec2-user password.",
+			"Type"                  : "String",
+			"MinLength"             : 8,
+			"MaxLength"             : 41,
+			"AllowedPattern"        : "[a-zA-Z0-9 ]*",
+			"ConstraintDescription" : "Must contain only alphanumeric characters."
+		},
+		"ServerName" : {
+			"Description" : "Name of the server instance",
+			"Type": "String",
+			"Default": "ML-DEV-App-Yellow-0",
+			"MinLength": 7,
+			"MaxLength": 250,
+			"AllowedPattern" : "[\\x20-\\x7E]*",
+			"ConstraintDescription" : "Can contain only ASCII characters."
+		},
+		"eMail" : {
+			"Description" : "eMail address of requestor.",
+			"Type": "String",
+			"Default": "jesus.martinezmanso@capitalone.com",
+			"MinLength": "15",
+			"MaxLength": "99",
+			"AllowedPattern": "([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)",
+			"ConstraintDescription": "Must be a valid email address."
+		},
+		"EnvType": {
+			"AllowedValues" : ["dev", "qa", "prod"],
+			"Default"       : "dev",
+			"Description"   : "Where do you want to build today?",
+			"Type"          : "String"
+		}
+	},
+
+	"Mappings" : {
+		"Commentary" : {
+			"Blather" : {
+				"Line01" : "This composition is built for the Machine Learning Environment",
+				"Line02" : "This CFT is uses ??? to be added later to install environment",
+				"Line03" : "This version of the CFT is behind an ELB (for IP persistence) but not an ASG."
+			}
+		},
+
+		"Envs" : {
+			"dev"	: {
+				"AmiId"                 : "ami-a20d10b5",
+				"CMDBEnvironment"       : "ENVNPSBBMACHINELEARNING",
+				"DevNotifications"		: "arn:aws:sns:us-east-1:084220657940:Kentro-Lend_Comm",
+				"OpsNotifications"		: "arn:aws:sns:us-east-1:084220657940:Kentro_Environment_Management_Team",
+				"InstanceType"   	    : "m3.xlarge",
+				"DataVolumeID"			: "i-something",
+				"VolumeSize"			: "128",
+				"FormatSize"			: "125",
+				"EBSSnapID"				: "snap-0e9bd1b4feab2795f",
+				"IAMRole"				: "CapOne-SmallBusinesscommerce-Dev-CustomRole-NSBC",
+				"VPCIdentifier"			: "vpc-0eeea869",
+				"SecurityGroups"		: ["New VPC Enterprise All Instances SG 2016", "default VPC security group"],
+				"sgList"                : ["sg-6dbbe017", "sg-fb50fb81"],
+				"AvailZone"				: "us-east-1d",
+				"snELB"					: "subnet-ac978af4",
+				"snSvr"					: "subnet-ac978af4",
+				"BELBScheme"            : "internal",
+				"SSLCert"               : "arn:aws:iam::???-only need to add if testing SSL in DEV ",
+				"Centrify"				: "/opt/centrify/domain-join.sh < domain > < AD group > aws >> /var/log/centrify_stacktrace.log 2>&1 &",
+				"KeyPairName"			: "ML-DEV-jesus"
+			}
+
+		},
+		"Params" : {
+			"Tags":{
+				"ASV"		: "ASVSBBMACHINELEARNING",
+				"appName"	: "Machine Learning",
+				"Keywords"	: "Kentro-Lend_Comm"
+			}
+		}
+	},
+
+	"Resources" : {
+		"MyInstance":{
+			"Type":"AWS::EC2::Instance",
+			"Properties" : {
+                "BlockDeviceMappings": [
+                             {
+                                   "DeviceName": "/dev/sda1",
+                                   "Ebs": {
+                                     "VolumeType": "io1",
+                                     "Iops": "300",
+                                     "DeleteOnTermination": "false",
+                                     "VolumeSize": "32"
+                                   }
+                                 }
+                               ],
+				"IamInstanceProfile"	: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "IAMRole" ] },
+				"ImageId"				: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "AmiId" ] },
+				"InstanceType"			: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "InstanceType" ] },
+				"SecurityGroupIds"		: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "sgList" ] },
+				"SubnetId"				: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "snSvr" ] },
+				"KeyName"				: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "KeyPairName" ] },
+				"Tags"					: [
+					{"Key":"Name",				"Value" : { "Ref" : "ServerName" } },
+					{"Key":"Keywords",			"Value" : { "Fn::FindInMap" : ["Params", "Tags", "Keywords"] } },
+					{"Key":"ASV",				"Value" : { "Fn::FindInMap" : ["Params", "Tags", "ASV"] } },
+					{"Key":"CMDBEnvironment",	"Value" : { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "CMDBEnvironment" ] } },
+					{"Key":"OwnerContact",		"Value" : { "Ref" : "eMail" } }
+				],
+				"UserData" :  {"Fn::Base64":{"Fn::Join":["", [
+					"#!/bin/bash -v \n",
+					"# Set Host Name \n",
+						"HOSTNAME=", { "Fn::Join" : [ "-", [ {"Ref":"AWS::StackName"}, "Web" ] ] },"\n",
+						"export HOSTNAME\n",
+					"# Hard-code the root user password for early access \n",
+						"/bin/echo Capital1 | /usr/bin/passwd --stdin ubuntu \n",
+					"# set environment (permanent for restart)\n",
+            			"/bin/echo 'export HTTPS_PROXY=http://proxy.kdc.capitalone.com:8099' >> /etc/environment\n",
+           				"/bin/echo 'export HTTP_PROXY=http://proxy.kdc.capitalone.com:8099' >> /etc/environment\n",
+            			"/bin/echo 'export http_proxy=http://proxy.kdc.capitalone.com:8099' >> /etc/environment\n",
+            			"/bin/echo 'export https_proxy=http://proxy.kdc.capitalone.com:8099' >> /etc/environment\n",
+            			"/bin/echo 'export NO_PROXY=169.254.169.254,10.0.0.0/8,127.0.0.1,localhost' >> /etc/environment\n",
+            			"/bin/echo 'export no_proxy=169.254.169.254,10.0.0.0/8,127.0.0.1,localhost' >> /etc/environment\n",
+            			"/bin/echo 'export AWS_CONFIG_FILE=/tmp/.aws_config' >> /etc/environment\n",
+            			"/bin/echo 'export AWS_DEFAULT_REGION=", {"Ref":"AWS::Region"},"' >> /etc/environment\n",
+           			"source /etc/environment\n",
+"# Create the second volume \n",
+	"/bin/mkdir -p /opt/sbbp && /bin/chmod 777 /opt/sbbp \n",
+	"# Format & Mount the volume \n",
+	"/sbin/mkfs.ext4 /dev/xvdk && /bin/mount /dev/xvdk /opt/sbbp \n",
+	"/bin/echo '/dev/xvdk       /opt/sbbp    auto    defaults,noatime    1  2' >> /etc/fstab  \n",
+
+"/bin/echo 'this is test A' >> /etc/test1.txt  \n",
+
+					"# This will get you Centrify \n",
+						"#   ",{"Fn::FindInMap":["Envs", {"Ref":"EnvType"}, "Centrify"]},"\n",
+
+					"# Install goodies \n",
+                        "apt-get -y install java-common \n",
+					    "apt-get -y install wget \n",
+                        "apt-get -y install git \n",
+                        "apt-get -y install python-dev \n",
+                        "apt-get -y install python-pip \n",
+                        "apt-get -y install python-virtualenv \n",
+                        "apt-get -y install apache2 \n",
+                        "apt-get -y install libapache2-mod-wsgi \n",
+                        "apt-get -y install  swig  \n",
+                        "apt-get -y install libmysqlclient-dev \n",
+                        "# The install of mysql-server has a couple of prompts (like setting a root password), so maybe you should install manually later \n",
+                        "#apt-get -y install mysql-server \n",
+                        "apt-get -y install software-properties-common \n",
+                        "apt-get -y install python-mysqldb \n",
+					"# End of file #"
+				] ] } }
+			}
+		},
+		"MyVolume" : {
+			"Type" : "AWS::EC2::Volume",
+			"Properties" : {
+				"AvailabilityZone"	: { "Fn::GetAtt" : [ "MyInstance", "AvailabilityZone" ]},
+				"Size"				: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "VolumeSize" ] },
+				"SnapshotId"		: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "EBSSnapID" ] },
+				"VolumeType"		: "gp2",
+				"Tags"						: [
+					{"Key":"Name",			 "Value" : {"Ref" : "ServerName" } },
+					{"Key":"ASV",            "Value" : {"Fn::FindInMap" : ["Params", "Tags", "ASV"]}},
+					{"Key":"CMDBEnvironment","Value" : {"Fn::FindInMap" : ["Envs", {"Ref":"EnvType"}, "CMDBEnvironment"]}},
+					{"Key":"OwnerContact",   "Value" : {"Ref":"eMail"}},
+					{"Key":"App Name",       "Value" : {"Fn::FindInMap" : ["Params", "Tags", "appName"]}},
+					{"Key":"Keywords",       "Value" : {"Fn::FindInMap" : ["Params", "Tags", "Keywords"]}},
+					{"Key":"SNSTopicARN",    "Value" : {"Fn::FindInMap" : ["Envs", {"Ref":"EnvType"}, "DevNotifications"]}}
+				]
+			},
+			"DeletionPolicy" : "Snapshot"
+		},
+		"MyVolumeMount" : {
+			"Type" : "AWS::EC2::VolumeAttachment",
+			"Properties" : {
+				"InstanceId"	: { "Ref" : "MyInstance" },
+				"VolumeId"		: { "Ref" : "MyVolume" },
+				"Device"		: "/dev/xvdk"
+			}
+		},
+		"BELB" : {
+			"Type" : "AWS::ElasticLoadBalancing::LoadBalancer",
+			"Properties" : {
+
+				"ConnectionDrainingPolicy"	: { "Enabled" : "true", "Timeout" : 300 },
+				"ConnectionSettings"		: { "IdleTimeout": 600 },
+				"CrossZone"					: "false",
+				"HealthCheck"				: {
+					"Timeout"				: "3",
+					"Target"				: "TCP:22",
+					"Interval"				: "30",
+					"HealthyThreshold"		: "2",
+					"UnhealthyThreshold"	: "4"
+				},
+				"Listeners" 				: [
+                    {	"LoadBalancerPort"	: "80", "Protocol" : "HTTP", "InstancePort" : "80", "InstanceProtocol" : "HTTP" },
+					{	"InstancePort"		: "80",
+                        "InstanceProtocol"	: "HTTP",
+                        "LoadBalancerPort"	: "80",
+                        "Protocol"			: "HTTP"
+                    },
+                    {	"InstancePort"		: "80",
+                        "InstanceProtocol"	: "TCP",
+                        "LoadBalancerPort"	: "443",
+                        "Protocol"			: "TCP"
+                    },
+                    {	"InstancePort"		: "22",
+						"InstanceProtocol"	: "TCP",
+						"LoadBalancerPort"	: "22",
+						"Protocol"			: "TCP"
+					}
+				],
+				"Instances"					: [ { "Ref" : "MyInstance" } ],
+				"LoadBalancerName"			: { "Fn::Join":[ "-", [ {"Ref":"ServerName"}, "ELB" ] ] },
+				"Scheme"					: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "BELBScheme" ] },
+				"SecurityGroups"			: { "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "sgList"] },
+				"Subnets"					: [{ "Fn::FindInMap" : [ "Envs", {"Ref":"EnvType"}, "snELB"] }],
+				"Tags"						: [
+					{"Key":"Name",			 "Value" : {"Ref":"ServerName" }},
+					{"Key":"ASV",            "Value" : {"Fn::FindInMap" : ["Params", "Tags", "ASV"]}},
+					{"Key":"CMDBEnvironment","Value" : {"Fn::FindInMap" : ["Envs", {"Ref":"EnvType"}, "CMDBEnvironment"]}},
+					{"Key":"OwnerContact",   "Value" : {"Ref":"eMail"}},
+					{"Key":"App Name",       "Value" : {"Fn::FindInMap" : ["Params", "Tags", "appName"]}},
+					{"Key":"Keywords",       "Value" : {"Fn::FindInMap" : ["Params", "Tags", "Keywords"]}},
+					{"Key":"SNSTopicARN",    "Value" : {"Fn::FindInMap" : ["Envs", {"Ref":"EnvType"}, "DevNotifications"]}}
+				]
+			}
+		}
+	},
+
+	"Outputs":{
+		"EndPoint": {
+			"Value"       : {"Fn::GetAtt":["BELB", "DNSName"]},
+			"Description" : "DNS Name"
+		}
+	}
+}

@@ -1,0 +1,88 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+
+  "Description" : "AWS CloudFormation template to deploy a full LAMP server stack. This template creates an Amazon EC2 instance with an elastic IP, an Amazon RDS database instance, an IAM Role for the EC2 instance to make API requests to S3, EC2 and Cloudformation stack resources. A couple of S3 buckets to store logs and backups with a lifecycle policy of 15 days for backups and 30 days for logs.",
+
+  "Parameters" : {
+    "KeyPair" : {
+      "Description" : "Amazon EC2 Key Pair",
+      "Type" : "AWS::EC2::KeyPair::KeyName",
+      "Default" : "jmmanso-key-pair-ncalifornia"
+    },
+    "InstanceType" : {
+      "Description" : "EC2 instance class",
+      "Type" : "String",
+      "Default" : "t2.micro",
+      "AllowedValues" : ["t2.micro", "m2.small"],
+      "ConstraintDescription" : "Enter t2.micro or m2.small. Default is t2.micro."
+    },
+    "ElasticIP" : {
+      "Description" : "The Elastic IP to use to associate with the instance",
+      "Type" : "String"
+    },
+    "VpcId" : {
+      "Description" : "Amazon default VPC",
+      "Default" : "vpc-49d1362c",
+      "Type" : "String",
+      "AllowedPattern" : "^vpc-[a-zA-Z0-9]*",
+      "ConstraintDescription" : "must be a valid VPC identifier."
+    }
+  },
+
+  "Resources" : {
+    "WebServerSecurityGroup" : {
+      "Type" : "AWS::EC2::SecurityGroup",
+      "Properties" : {
+        "GroupDescription" : "Enable HTTP, HTTPS and SSH access",
+        "VpcId" : {"Ref" : "VpcId"},
+        "SecurityGroupIngress" : [
+          {"IpProtocol" : "tcp", "FromPort" : "80", "ToPort" : "80", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "443", "ToPort" : "443", "CidrIp" : "0.0.0.0/0"},
+          {"IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "0.0.0.0/0"}
+        ]
+      }
+    },
+
+
+
+    "WebServerEc2Instance" : {
+      "Type" : "AWS::EC2::Instance",
+      "Properties" : {
+        "ImageId" : "ami-539ac933",
+        "InstanceType"   : { "Ref" : "InstanceType" },
+        "SecurityGroupIds" : [ {"Ref" : "WebServerSecurityGroup"} ],
+        "KeyName"        : { "Ref" : "KeyPair" },
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash\n",
+                "aptitude update\n",
+                "aptitude -y install python-setuptools\n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "# Install the files and packages from the metadata\n",
+                "cfn-init --stack ", { "Ref" : "AWS::StackName" }," --resource WebServerEc2Instance --region ", { "Ref" : "AWS::Region" }, "\n",
+                "# Signal the status from cfn-init\n",
+                "cfn-signal -e $? ","--stack ", { "Ref" : "AWS::StackName" }," --resource WebServerEc2Instance --region ", { "Ref" : "AWS::Region" }, "\n"
+              ]
+            ]
+          }
+        }
+      },
+      "CreationPolicy" : {
+        "ResourceSignal" : {
+          "Timeout" : "PT5M"
+        }
+      }
+    },
+
+  },
+
+  "Outputs" : {
+    "WebsiteURL" : {
+      "Value" : { "Fn::Join" : ["", ["http://", { "Fn::GetAtt" : [ "WebServerEc2Instance", "PublicIp" ]}, "/" ]]},
+      "Description" : "URL of WebServer site"
+    }
+  }
+}
