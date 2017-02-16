@@ -1,7 +1,4 @@
-
 from wtforms import SubmitField, Form, FileField
-
-
 
 
 class ImageForm(Form):

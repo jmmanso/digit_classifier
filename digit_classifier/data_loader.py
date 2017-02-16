@@ -1,7 +1,6 @@
-from sklearn.preprocessing import OneHotEncoder
+import numpy as np
 from scipy import misc
 import subprocess
-import numpy as np
 import os
 thisdir = os.path.dirname(__file__)
 #
@@ -10,15 +9,13 @@ import read_mnist
 
 
 
-
-
-
-
 class TrainingDataLoader:
-
+    """
+    Methods to download, extract, read, save and load
+    MNIST image data.
+    """
 
     def download_and_extract_data(self):
-
         if not self.rawdata_exists():
             print "Raw data files not found. Downloading data..."
             self.download()
@@ -38,6 +35,11 @@ class TrainingDataLoader:
             return False
 
     def download(self):
+        """
+        Download raw MNIST data from the official
+        website via system wget call.
+        """
+        # Define status=1 as good
         status = 1
         for _fileurl in config.rawdata_urls:
             print "Downloading "+_fileurl
@@ -48,7 +50,14 @@ class TrainingDataLoader:
             raise Exception("Unable to download data")
 
     def extract(self):
+        """
+        Uncompress and read the downloaded MNIST data.
+        Saves data as .npy and for future reloads.
 
+        RETURNS
+            tuple of ndarrays: training images, training labels,
+            test images, test labels
+        """
         print "Extracting data from files. This might take several minutes"
         X_train, y_train = \
             read_mnist.get_labeled_data(
@@ -70,6 +79,15 @@ class TrainingDataLoader:
         return X_train, y_train, X_test, y_test
 
     def load(self):
+        """
+        Wrapper function that loads the image data. If
+        data are not found on disk as .npy files, it proceeds
+        to download raw data from web source.
+
+        RETURNS
+            tuple of ndarrays: training images, training labels,
+            test images, test labels
+        """
 
         try:
             X_train = np.load(os.path.join(config.rawdata_dir, 'training_images.npy'))
@@ -85,26 +103,35 @@ class TrainingDataLoader:
 
 
 class HttpDataLoader:
+    """
+    Methods to read, format, crop, resample and
+    load an image. Aimed to preprocess images
+    from POST requests for real-time classification.
+    """
 
     def __init__(self,
         image_path,
         min_px_size = config.min_px_size,
         final_img_size = config.final_img_size):
+
+        # Read image from file:
         self.img = misc.imread(image_path, mode='P')
         self.min_px_size = min_px_size
         self.final_img_size = final_img_size
 
     def image_check(self, img):
-        # get the sizes of each axis
-        size0, size1 = img.shape
-        # checl minimum size in pixels
-        if size0 < self.min_px_size and size1 < self.min_px_size:
+        """
+        Check if the image meets the minimum size requirements
+        """
+        if img.shape[0] < self.min_px_size and img.shape[1] < self.min_px_size:
             return False
         else:
             return True
 
     def image_crop(self, img):
-        """ If image is rectangular, crop to central square """
+        """
+        If image is rectangular, crop to central square
+        """
         smallest_axis_index = np.argmin(img.shape)
         largest_axis_index = (1 - smallest_axis_index)**2
         smallest_axis_px = img.shape[smallest_axis_index]
@@ -119,12 +146,17 @@ class HttpDataLoader:
         return img
 
     def image_resample(self, img):
-        """ Resample image to match MNIST resolution """
+        """
+        Resample image to match MNIST resolution
+        """
         img = misc.imresize(img, \
             size = (self.final_img_size, self.final_img_size))
         return img
 
     def load(self):
+        """
+        Wrapper for all methods in class
+        """
         if not self.image_check(self.img):
             return False
         img = self.image_crop(self.img)

@@ -1,6 +1,9 @@
+"""
+Main configuration file for the digit_classifier app
+"""
+
 import os
 thisdir = os.path.dirname(__file__)
-
 
 
 
