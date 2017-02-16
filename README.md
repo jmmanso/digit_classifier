@@ -31,17 +31,27 @@ However, the app pipeline has extended capability to process digit images from o
 
 ## Deployment on local machine
 
-The following steps will take you to serve the application locally with a Flask server. These steps are reversible and non-invasive, in the end we will remove all of it.
-Please use a OSX or Linux system.
+The following steps will take you to serve the application locally with a Flask server. Please use a OSX or Linux system.
+
+#### Quick deploy
+
+The entire application can be built with these commands
+
+```bash
+git clone https://github.com/jmmanso/digit_classifier.git /usr/local/opt/digit_classifier
+cd /usr/local/opt/digit_classifier/deployment_scripts
+sudo bash build_all_local.sh
+```
+
+These deployment steps are discussed below.
 
 #### Get the code
 Clone the repo
 ```bash
-git clone https://github.com/jmmanso/digit_classifier.git \
-/usr/local/opt/digit_classifier
+git clone https://github.com/jmmanso/digit_classifier.git /usr/local/opt/digit_classifier
 ```
 
-These are some relevant files:
+If you wish to inspect the app configuration, here are some relevant files:
 * App environment configuration: `digit_classifier/deployment_scripts/config_profile.sh`
 * Model-specific configuration: `digit_classifier/config.py`
 * Top-level model file defining training and evaluation wrapper classes: `digit_classifier/main.py`
@@ -63,7 +73,7 @@ cd /usr/local/opt/digit_classifier/deployment_scripts
 sudo bash build_all_local.sh
 ```
 
-You will be able to see the training process in the terminal. Like this:
+You will be able to see the training process in the terminal, something like this:
 ```bash
 Epoch 0 train_accuracy: 0.677  test_accuracy: 0.865
 Epoch 1 train_accuracy: 0.888  test_accuracy: 0.897
