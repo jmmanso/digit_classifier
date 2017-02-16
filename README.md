@@ -63,7 +63,16 @@ cd /usr/src/digit_classifier/deployment_scripts
 sudo bash build_all_local.sh
 ```
 
-In a web browser, go to `http://localhost:5000/`, and you will see the app.
+You will be able to see the training process in the terminal. Like this:
+```bash
+Epoch 0 train_accuracy: 0.677  test_accuracy: 0.865
+Epoch 1 train_accuracy: 0.888  test_accuracy: 0.897
+Epoch 2 train_accuracy: 0.909  test_accuracy: 0.923
+Epoch 3 train_accuracy: 0.923  test_accuracy: 0.932
+Epoch 4 train_accuracy: 0.931  test_accuracy: 0.936
+```
+
+Once the job is finished, in a web browser go to `http://localhost:5000/`, and you will see the app.
 
 #### Clean up
 

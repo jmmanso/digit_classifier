@@ -8,7 +8,12 @@ thisdir = os.path.dirname(__file__)
 
 
 ### DIRECTORIES AND TAGS
-rawdata_baseurl = 'http://yann.lecun.com/exdb/mnist/'
+
+# Since Yann Lecun's website has been having a lot
+# of downtime lately, let's pull the raw data from S3
+#rawdata_baseurl = 'http://yann.lecun.com/exdb/mnist/'
+rawdata_baseurl = 'https://s3-us-west-1.amazonaws.com/digits-classifier/'
+
 rawdata_files = \
     {'training_images' : 'train-images-idx3-ubyte.gz',
     'training_labels' : 'train-labels-idx1-ubyte.gz',
