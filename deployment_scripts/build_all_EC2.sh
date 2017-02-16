@@ -7,7 +7,7 @@ source config_profile.sh
 bash install_pyvenv.sh
 
 # Train mymodel
-bash train_mymodel.sh
+bash train_model.sh
 
 # Permissions and symlinks
 bash set_permissions.sh
