@@ -6,7 +6,7 @@
 # virtualenv.
 
 if hash conda; then
-      sudo conda install virtualenv
+      sudo conda install -y virtualenv
    else
       sudo easy_install virtualenv
 fi
