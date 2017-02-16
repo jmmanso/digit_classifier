@@ -53,9 +53,9 @@ git clone https://github.com/jmmanso/digit_classifier.git /usr/local/opt/digit_c
 
 If you wish to inspect the app configuration, here are some relevant files:
 * App environment configuration: `digit_classifier/deployment_scripts/config_profile.sh`
-* Model-specific configuration: `digit_classifier/config.py`
-* Top-level model file defining training and evaluation wrapper classes: `digit_classifier/main.py`
-* The model is served to the app via: `digit_classifier/api/views.py`
+* Model-specific configuration: `digit_classifier/digit_classifier/config.py`
+* Top-level model file defining training and evaluation wrapper classes: `digit_classifier/digit_classifier/main.py`
+* The model is served to the app via: `digit_classifier/digit_classifier/api/views.py`
 
 ### Build the app
 
