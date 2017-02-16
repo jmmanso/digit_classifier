@@ -33,7 +33,7 @@ However, the app pipeline has extended capability to process digit images from o
 
 The following steps will take you to serve the application locally with a Flask server. Please use a OSX or Linux system.
 
-#### Quick deploy
+### Quick deploy
 
 The entire application can be built with these commands
 
@@ -45,7 +45,7 @@ sudo bash build_all_local.sh
 
 These deployment steps are discussed below.
 
-#### Get the code
+### Get the code
 Clone the repo
 ```bash
 git clone https://github.com/jmmanso/digit_classifier.git /usr/local/opt/digit_classifier
@@ -57,7 +57,7 @@ If you wish to inspect the app configuration, here are some relevant files:
 * Top-level model file defining training and evaluation wrapper classes: `digit_classifier/main.py`
 * The model is served to the app via: `digit_classifier/api/views.py`
 
-#### Build the app
+### Build the app
 
 At a high level, the build process consists of:
 * Define environment variables for the app
@@ -84,7 +84,7 @@ Epoch 4 train_accuracy: 0.931  test_accuracy: 0.936
 
 Once the job is finished, in a web browser go to `http://localhost:5000/`, and you will see the app.
 
-#### Clean up
+### Clean up
 
 Remove the repo, app and virtual environment directories
 ```bash
