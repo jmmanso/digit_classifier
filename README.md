@@ -38,7 +38,7 @@ Please use a OSX or Linux system.
 Clone the repo
 ```bash
 git clone https://github.com/jmmanso/digit_classifier.git \
-/usr/src/digit_classifier
+/usr/local/opt/digit_classifier
 ```
 
 These are some relevant files:
@@ -59,7 +59,7 @@ At a high level, the build process consists of:
 Execute build script, which can take several minutes:
 
 ```bash
-cd /usr/src/digit_classifier/deployment_scripts
+cd /usr/local/opt/digit_classifier/deployment_scripts
 sudo bash build_all_local.sh
 ```
 
@@ -78,7 +78,7 @@ Once the job is finished, in a web browser go to `http://localhost:5000/`, and y
 
 Remove the repo, app and virtual environment directories
 ```bash
-cd /usr/src/digit_classifier/deployment_scripts
+cd /usr/local/opt/digit_classifier/deployment_scripts
 sudo bash cleanup.sh
-rm -rf /usr/src/digit_classifier
+rm -rf /usr/local/opt/digit_classifier
 ```
