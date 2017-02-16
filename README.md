@@ -6,7 +6,7 @@ The application can be accessed here:
 
 http://ec2-54-219-168-245.us-west-1.compute.amazonaws.com/
 
-In the sections below we will cover the details of the application and walk through a local deployment on your machine.
+In the sections below we will cover some of the details of the application and walk through a local deployment on your machine.
 
 
 ### What are the app components?
@@ -27,7 +27,7 @@ which contains 60000 images of 28x28 pixels in size.
 However, the app pipeline has extended capability to process digit images from other sources. In particular:
 * Part of the training image set has been inverted, thus this classifier works well with black or white backgrounds.
 * Rectangular images are accepted. They will be cropped to a central square of maximum size.
-* Images can also be of any size (within some edge limits). They will be resampled to match the original MNIST 28x28 resolution.
+* Images can also be of any size (within some edge limits; more than 10px and less than 1 Mb). They will be resampled to match the original MNIST 28x28 resolution.
 
 ## Deployment on local machine
 
@@ -41,7 +41,11 @@ git clone https://github.com/jmmanso/digit_classifier.git \
 /usr/src/digit_classifier
 ```
 
-Model-specific configuration can be seen and modified at `digit_classifier/config.py`.
+These are some relevant files:
+* App environment configuration: `digit_classifier/deployment_scripts/config_profile.sh`
+* Model-specific configuration: `digit_classifier/config.py`
+* Top-level model file defining training and evaluation wrapper classes: `digit_classifier/main.py`
+* The model is served to the app via: `digit_classifier/api/views.py`
 
 #### Build the app
 
@@ -56,14 +60,16 @@ Execute build script, which can take several minutes:
 
 ```bash
 cd /usr/src/digit_classifier/deployment_scripts
-bash build_all_local.sh
+sudo bash build_all_local.sh
 ```
 
 In a web browser, go to `http://localhost:5000/`, and you will see the app.
 
-#### Cleaning up
+#### Clean up
 
+Remove the repo, app and virtual environment directories
 ```bash
 cd /usr/src/digit_classifier/deployment_scripts
-bash cleanup.sh
+sudo bash cleanup.sh
+rm -rf /usr/src/digit_classifier
 ```
